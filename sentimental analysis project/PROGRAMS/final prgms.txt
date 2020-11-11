@@ -1,0 +1,192 @@
+import speech_recognition as sr
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import matplotlib.pyplot as plt
+import re
+import numpy as np
+import wave
+import sys
+import math
+import contextlib
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+import tkinter as tk
+from tkinter import filedialog
+def UploadAction(event=None):
+    filename = filedialog.askopenfilename()
+root = tk.Tk()
+button = tk.Button(root, text='import', command=UploadAction)
+button.pack()
+root.mainloop()
+fname =  'shri.wav'
+outname = 'fulty.wav'
+cutOffFrequency = 400.0
+def running_mean(x, windowSize):
+  cumsum = np.cumsum(np.insert(x, 0, 0))
+  return (cumsum[windowSize:] - cumsum[:-windowSize]) / windowSize
+def interpret_wav(raw_bytes, n_frames, n_channels, sample_width, interleaved = True):
+    if sample_width == 1:
+        dtype = np.uint8 # unsigned char
+    elif sample_width == 2:
+        dtype = np.int16 # signed 2-byte short
+    else:
+        raise ValueError("Only supports 8 and 16 bit audio formats.")
+    channels = np.frombuffer(raw_bytes, dtype=dtype)
+    if interleaved:
+        # channels are interleaved, i.e. sample N of channel M follows sample N of channel M-1 in raw data
+        channels.shape = (n_frames, n_channels)
+        channels = channels.T
+    else:
+        # channels are not interleaved. All samples from channel M occur before all samples from channel M-1
+        channels.shape = (n_channels, n_frames)
+    return channels
+with contextlib.closing(wave.open(fname,'rb')) as spf:
+    sampleRate = spf.getframerate()
+    ampWidth = spf.getsampwidth()
+    nChannels = spf.getnchannels()
+    nFrames = spf.getnframes()
+# Extract Raw Audio from multi-channel Wav File
+    signal = spf.readframes(nFrames*nChannels)
+    spf.close()
+    channels = interpret_wav(signal, nFrames, nChannels, ampWidth, True)
+    freqRatio = (cutOffFrequency/sampleRate)
+    N = int(math.sqrt(0.196196 + freqRatio**2)/freqRatio)
+    # Use moviung average (only on first channel)
+    filtered = running_mean(channels[0], N).astype(channels.dtype)
+    wav_file = wave.open(outname, "w")
+    wav_file.setparams((1, ampWidth, sampleRate, nFrames, spf.getcomptype(), spf.getcompname()))
+    wav_file.writeframes(filtered.tobytes('C'))
+print("noise removed")
+print("**********TEXT ANALYSIS*******")
+wav_file.close()
+r = sr.Recognizer()
+audio = 'shri.wav'
+with sr.AudioFile(audio) as source:
+    audio = r.record(source)
+    print ('speech to text Done!')
+try:
+    text = r.recognize_google(audio)
+except Exception as e:
+    print (e)
+with open('shri.txt','w') as f:
+	word = text
+	f.write(word+'\n')
+text = open("shri.txt")
+text= text.read()
+result = re.sub(r"\d+", "", text)
+print("numbers removed")
+text= result.lower()
+print("words are converted into lower case")
+result = re.sub(r"\d+", "", text)
+print("numbers removed")
+text= result.lower()
+print("words are converted into lower case")
+
+stop_words = set(stopwords.words('english'))
+word_tokens = word_tokenize(text)
+filtered_sentence = [w for w in word_tokens if not w in stop_words]
+filtered_sentence = []
+for w in word_tokens:
+    if w not in stop_words:
+        filtered_sentence.append(w)
+print("stopwords_removed")
+stemmer= PorterStemmer()
+text=word_tokenize(text)
+print("stemming done")
+audio = 'shri.wav'
+sid = SentimentIntensityAnalyzer()
+ss = sid.polarity_scores(audio)
+print(ss)
+if ss["compound"] >= 0.5:
+    print("positive")
+elif ss["compound"] <= -0.5:
+    print("negative")
+else:
+    print("neutral")
+print( "************TONE ANALYSIS***********")
+import paralleldots
+audio = 'shri.wav'
+paralleldots.set_api_key("8DhrXaaW5mRir7398Ut0hmvYElXfREMtpF4ovagK0wY")
+response=paralleldots.emotion(audio)
+print(response)
+labels = ['negative', 'neutral', 'positive']
+sizes  = [ss['neg'], ss['neu'], ss['pos']]
+plt.pie(sizes, labels=labels, autopct='%1.1f%%') # autopct='%1.1f%%' gives you percentages printed in every slice.
+plt.axis('equal')  # Ensures that pie is drawn as a circle.
+plt.show()
+height = [0.18875393338668855, 0.12091620158881104, 0.11411100422646056, 0.16150017534992425,0.22726635602322953,0.18745232942488582]
+bars = ('excited', 'fear','bored','sad','happy','Angry')
+y_pos = np.arange(len(bars))
+plt.bar(y_pos, height, color=['green', 'red', 'violet', 'gold', 'blue','black'])
+plt.xticks(y_pos, bars)
+plt.show()
+print("**************MAPPING**************")
+import paralleldots
+text1 = "im happy"
+text2 = "im sad"
+paralleldots.set_api_key("8DhrXaaW5mRir7398Ut0hmvYElXfREMtpF4ovagK0wY")
+response=paralleldots.similarity(text1,text2)
+print(response)
+
+
+
+
+
+donut chart:
+
+import matplotlib.pyplot as plt
+# Make data: I have 3 groups and 7 subgroups
+group_names=['positive = 60%', 'negative = 20%', 'neutral = 20%']
+group_size=[12,11,30]
+subgroup_names=['happy = 20%', 'sad= 20%', 'excited= 20%', 'fear=20%', 'bored=10%','Angry=10%']
+
+sizes = [30,40,30]
+
+subgroup_size=[4,3,5,6,5,5]
+
+#create colors
+
+
+a, b, c=[plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
+
+
+
+
+
+# First Ring (outside)
+
+
+fig, ax = plt.subplots()
+
+
+ax.axis('equal')
+
+
+mypie, _ = ax.pie(group_size, radius=1.5, labels=group_names, colors=[a(0.9), b(0.9), c(0.9)] )
+
+
+plt.setp( mypie, width=0.5, edgecolor='black')
+
+
+
+
+
+# Second Ring (Inside)
+
+
+mypie2, _ = ax.pie(subgroup_size, radius=1.3-0.3, labels=subgroup_names, labeldistance=0.7, colors=[a(0.5), a(0.4), a(0.3), b(0.5), b(0.4), c(0.6)])
+
+plt.setp( mypie2, width=0.4, edgecolor='white')
+
+
+plt.margins(0,0)
+
+
+
+
+
+# show it
+
+
+plt.show()
+

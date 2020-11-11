@@ -1,0 +1,142 @@
+1.audio 
+
+import speech_recognition as sr
+
+r = sr.Recognizer()
+
+audio = 'shri.wav'
+
+with sr.AudioFile(audio) as source:
+    audio = r.record(source)
+    print ('Done!')
+
+try:
+    text = r.recognize_google(audio)
+    print (text)
+
+except Exception as e:
+    print (e)
+
+from textblob import TextBlob
+text = open("shri.txt")
+text = text.read()
+blob = TextBlob(text)
+
+b=list(blob.sentiment)
+print(blob.sentiment)
+print(type(b))
+
+sent = TextBlob(text)
+polarity = sent.sentiment.polarity
+subjectivity = sent.sentiment.subjectivity
+if polarity >= 0.1:
+     print("positive")
+elif polarity <= -0.1:
+        print("negative")
+else:
+        sentiment("neutral")
+
+
+2.final
+
+import re
+input_str = "please1234566 message 4me at morning6436743768 beacuse im having class now.tomorrow i will meet you."
+result = re.sub(r"\d+", "", input_str)
+print("numbers removed")
+print(result)
+
+
+
+input_str = "PLEASE MESSAGE ME AT MORNING BECAUSE IM HAVING CLASS NOW TOMORROW I WILL MEET YOU"
+input_str = input_str.lower()
+print("words are converted into lower case")
+print(input_str)
+
+
+from nltk.tokenize import sent_tokenize, word_tokenize
+text = "please message me at morning beacuse im having class now.tomorrow i will meet you"
+print("words tokenized")
+print(sent_tokenize(text))
+print(word_tokenize(text))
+
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+example_sent = "please message me at morning beacuse im having class now.tomorrow i will meet you"
+
+stop_words = set(stopwords.words('english'))
+
+word_tokens = word_tokenize(example_sent)
+
+filtered_sentence = [w for w in word_tokens if not w in stop_words]
+
+filtered_sentence = []
+
+for w in word_tokens:
+    if w not in stop_words:
+        filtered_sentence.append(w)
+
+print("stopwords_removed")
+print(filtered_sentence)
+
+
+
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+stemmer= PorterStemmer()
+input_str=("There are several types of stemming algorithms")
+input_str=word_tokenize(input_str)
+for word in input_str:
+    print(stemmer.stem(word))
+
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+lemmatizer=WordNetLemmatizer()
+input_str=("been had done languages cities mice”)
+input_str=word_tokenize(input_str)
+for word in input_str:
+    print(lemmatizer.lemmatize(word))
+
+
+from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
+
+
+text  = "please message me at morning beacuse im having class now.tomorrow i will meet you"
+
+sent   = TextBlob(text)
+# The polarity score is a float within the range [-1.0, 1.0]
+# where negative value indicates negative text and positive
+# value indicates that the given text is positive.
+polarity      = sent.sentiment.polarity
+# The subjectivity is a float within the range [0.0, 1.0] where
+# 0.0 is very objective and 1.0 is very subjective.
+subjectivity  = sent.sentiment.subjectivity
+
+sent          = TextBlob(text, analyzer = NaiveBayesAnalyzer())
+classification= sent.sentiment.classification
+positive      = sent.sentiment.p_pos
+negative      = sent.sentiment.p_neg
+
+print (polarity,subjectivity)
+print(classification)
+print(positive*100)
+print(negative*100)
+
+
+
+import matplotlib.pyplot as plt
+
+# Data to plot
+labels = 'positive', 'negative'
+sizes = [sent.sentiment.p_pos, sent.sentiment.p_neg]
+colors = ['blue', 'pink']
+explode = (0.1, 0, )  # explode 1st slice
+
+# Plot
+plt.pie(sizes, explode=explode, labels=labels, colors=colors,
+        autopct='%1.1f%%', shadow=True, startangle=140)
+
+plt.axis('equal')
+plt.show()

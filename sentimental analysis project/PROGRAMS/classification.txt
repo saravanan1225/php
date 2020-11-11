@@ -1,0 +1,95 @@
+import speech_recognition as sr
+
+r = sr.Recognizer()
+
+audio = 'shri.wav'
+
+with sr.AudioFile(audio) as source:
+    audio = r.record(source)
+    print ('Done')
+
+try:
+    text = r.recognize_google(audio)
+    print (text)
+
+except Exception as e:
+    print (e)#speech to text conversion#
+
+import re
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
+text = open("shri.txt")
+text= text.read()
+result = re.sub(r"\d+", "", text)
+print("numbers removed")
+print(result)
+
+
+text= result.lower()
+print("words are converted into lower case")
+print(text)
+
+print("words tokenized")
+print(word_tokenize(text))
+
+stop_words = set(stopwords.words('english'))
+word_tokens = word_tokenize(text)
+filtered_sentence = [w for w in word_tokens if not w in stop_words]
+filtered_sentence = []
+for w in word_tokens:
+    if w not in stop_words:
+        filtered_sentence.append(w)
+print("stopwords_removed")
+print(filtered_sentence)
+
+
+
+stemmer= PorterStemmer()
+text = open("shri.txt")
+text= text.read()
+text=word_tokenize(text)
+for word in text:
+    print("Stemming Done")
+print(stemmer.stem(word))
+
+
+
+from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
+
+text  = open("shri.txt")
+text = text.read()
+sent   = TextBlob(text)
+# The polarity score is a float within the range [-1.0, 1.0]
+# where negative value indicates negative text and positive
+# value indicates that the given text is positive.
+polarity      = sent.sentiment.polarity
+# The subjectivity is a float within the range [0.0, 1.0] where
+# 0.0 is very objective and 1.0 is very subjective.
+subjectivity  = sent.sentiment.subjectivity
+
+sent          = TextBlob(text, analyzer = NaiveBayesAnalyzer())
+classification= sent.sentiment.classification
+positive      = sent.sentiment.p_pos
+negative      = sent.sentiment.p_neg
+
+print (polarity,subjectivity)
+print(classification)
+print(positive*100)
+print(negative*100)
+
+import matplotlib.pyplot as plt
+
+# Data to plot
+labels = 'positive', 'negative'
+sizes = [sent.sentiment.p_pos, sent.sentiment.p_neg]
+colors = ['blue', 'pink']
+explode = (0.1, 0, )  # explode 1st slice
+
+# Plot
+plt.pie(sizes, explode=explode, labels=labels, colors=colors,
+        autopct='%1.1f%%', shadow=True, startangle=140)
+
+plt.axis('equal')
+plt.show()

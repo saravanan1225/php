@@ -1,0 +1,36 @@
+import speech_recognition as sr
+import matplotlib as plt
+
+r = sr.Recognizer()
+
+audio = 'shri.wav'
+
+with sr.AudioFile(audio) as source:
+    audio = r.record(source)
+    print ('Done!')
+
+try:
+    text = r.recognize_google(audio)
+    print (text)
+
+except Exception as e:
+    print (e)
+
+from textblob import TextBlob
+text = open("shri.txt")
+text = text.read()
+blob = TextBlob(text)
+
+b=list(blob.sentiment)
+print(blob.sentiment)
+print(type(b))
+
+sent = TextBlob(text)
+polarity = sent.sentiment.polarity
+subjectivity = sent.sentiment.subjectivity
+if polarity >= 0.1:
+     print("positive")
+elif polarity <= -0.1:
+        print("negative")
+else:
+        sentiment("neutral")
